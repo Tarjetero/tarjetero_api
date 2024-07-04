@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\ApiResponse;
-use App\CodigosRes;
-use App\Msg;
-use App\Services\Actions\ClienteServiceAction;
-use App\Services\Data\ClienteServiceData;
-use App\Utilerias\Utilerias;
 use Exception;
+use App\Helpers\ApiResponse;
+use App\Helpers\CodeResponse;
+use App\Utilerias\Utilerias;
 use Illuminate\Http\Request;
+use App\Services\Data\ClienteServiceData;
 use Illuminate\Support\Facades\Validator;
+use App\Services\Actions\ClienteServiceAction;
 
 class ClienteController
 {
@@ -26,10 +25,10 @@ class ClienteController
 
             $clientes = ClienteServiceData::listar($filtros);
 
-            return response(ApiResponse::build(CodigosRes::EXITO,"Datos listados correctamente.",$clientes));
+            return response(ApiResponse::build(CodeResponse::EXITO,"Datos listados correctamente.",$clientes));
 
         }catch(Exception $e){
-            return response(ApiResponse::build(CodigosRes::ERROR,$e->getMessage()));
+            return response(ApiResponse::build(CodeResponse::ERROR,$e->getMessage()));
         }
     }
 
@@ -53,10 +52,10 @@ class ClienteController
             $datos = $request->all();
             $result = ClienteServiceAction::agregarCliente($datos);
 
-            return response(ApiResponse::build(CodigosRes::EXITO,"Operación realizada correctamente.",$result));
+            return response(ApiResponse::build(CodeResponse::EXITO,"Operación realizada correctamente.",$result));
 
         }catch(Exception $e){
-            return response(ApiResponse::build(CodigosRes::ERROR,$e->getMessage()));
+            return response(ApiResponse::build(CodeResponse::ERROR,$e->getMessage()));
         }
     }
 
@@ -81,10 +80,10 @@ class ClienteController
             $datos = $request->all();
             ClienteServiceAction::editarCliente($datos);
 
-            return response(ApiResponse::build(CodigosRes::EXITO,"Operación realizada correctamente."));
+            return response(ApiResponse::build(CodeResponse::EXITO,"Operación realizada correctamente."));
 
         }catch(Exception $e){
-            return response(ApiResponse::build(CodigosRes::ERROR,$e->getMessage()));
+            return response(ApiResponse::build(CodeResponse::ERROR,$e->getMessage()));
         }
     }
 
