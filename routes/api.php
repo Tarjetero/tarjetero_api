@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 /* "litipk/php-bignumbers": "^0.8.6",
 "simplesoftwareio/simple-qrcode": "^4.2.0",
@@ -10,14 +11,10 @@ $router->get('/', function () use ($router) {
     return view("test");
 });
 
-$router->group(['middleware' => ['cors']], function () use ($router) {
-    // AUTH
-    $router->group(['prefix' => 'auth'], function () use ($router) {
-        $router->post('login', ['uses' => 'AuthController@authenticate']);
-        $router->post('logout', ['uses' => 'AuthController@cerrarSesion']);
-        $router->get('version', ['uses' => 'AuthController@version']);
-    });
-    //$router->get('clientes/getClientes', ['uses' => 'ClienteController@getUsuarios']);
+Route::controller(AuthController::class)->prefix('auth')->group(function () {
+  Route::post('login', 'authenticate');
+  Route::post('logout', 'cerrarSesion');
+  Route::post('version', 'version');
 });
 
 $router->group(['middleware' => ['cors']], function () use ($router) {
