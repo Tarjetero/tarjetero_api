@@ -16,7 +16,7 @@ class TarjetaRH
   public static function getListarFiltros(Builder &$query, array $filtros)
   {
     if (!empty($filtros['clienteId'])) {
-      $query->where('t.clieasdante_id', $filtros['clienteId']);
+      $query->where('t.cliente_id', $filtros['clienteId']);
     }
   }
 }
