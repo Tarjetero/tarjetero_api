@@ -11,11 +11,13 @@
         "ext-curl": "*",
         "ext-dom": "*",
         "ext-json": "*",
+        "firebase/php-jwt": "^6.10.0",
+        "guzzlehttp/guzzle": "^7.8.0",
         "bacon/bacon-qr-code": "^3.0",
         "hidehalo/nanoid-php": "^1.1",
         "illuminate/mail": "^11.11.0",
         "illuminate/redis": "^11.11.0",
-        "illuminate/support": "^11.11.0"
+        "illuminate/support": "^11.11.0",
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
