@@ -11,6 +11,7 @@ use App\Helpers\CodeResponse;
 use App\Services\Data\ClienteServiceData;
 use Illuminate\Support\Facades\Validator;
 use App\Services\Actions\ClienteServiceAction;
+use Throwable;
 
 class ClienteController
 {
@@ -57,13 +58,13 @@ class ClienteController
 
             $datos = $request->all();
             $datos['ip'] = $request->ip();
-            $datos['userAGent'] = $request->userAgent();
+            $datos['userAgent'] = $request->userAgent();
             $result = ClienteServiceAction::registroCliente($datos);
 
             return response(ApiResponse::build(CodeResponse::EXITO,"Operación realizada correctamente.",$result));
 
-        }catch(Exception $e){
-            return response(ApiResponse::build(CodeResponse::ERROR,$e->getMessage()));
+        } catch (Throwable $e) {
+            throw $e;
         }
     }
 

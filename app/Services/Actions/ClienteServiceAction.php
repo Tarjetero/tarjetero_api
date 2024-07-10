@@ -36,7 +36,7 @@ class ClienteServiceAction
 
             // Se arma insert de nuevo cliente
             $insert = ClienteBO::armarInsert($datos);
-            $clienteId = ClienteRepoAction::agregarCliente($insert);
+            $datos['clienteId'] = ClienteRepoAction::agregarCliente($insert);
 
             // Se arma insert de perfil de cliente
             $insertPerfil = ClienteBO::armarInsertPerfil($datos);
@@ -47,7 +47,7 @@ class ClienteServiceAction
             SuscripcionRepoAction::agregarSuscripcion($insertSuscripcion);
 
             //Se realiza inicio de sesión despues de registrarse
-            $authData = AuthServiceData::autenticar($email, $datos['password'], $datos['ip'], $datos['userAgent']);
+            $authData = AuthServiceData::autenticar($datos['email'], $datos['password'], $datos['ip'], $datos['userAgent']);
 
             return $authData;
         });

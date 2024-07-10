@@ -43,7 +43,7 @@ class ClienteRepoData implements AuthorizableContract, AuthenticatableContract
                     // Pais
                     'cls.fecha_fin AS fecha_limite_suscripcion',
                 )
-                ->join('clientes_perfiles AS clp', 'cl.cliente_id', 'clp.cliente_id')
+                ->join('clientes_perfil AS clp', 'cl.cliente_id', 'clp.cliente_id')
                 ->join('clientes_suscripciones AS cls', 'cl.cliente_id', 'cls.cliente_id')
                 ->where('cl.cliente_id', $clienteId)->get()->first();
 
@@ -94,7 +94,7 @@ class ClienteRepoData implements AuthorizableContract, AuthenticatableContract
                 'cp.usuario',
                 'c.status'
             )
-            ->join('clientes_perfiles AS cp', 'c.cliente_id', 'cp.cliente_id')
+            ->join('clientes_perfil AS cp', 'c.cliente_id', 'cp.cliente_id')
             ->where('c.status', Constantes::STATUS_ACTIVO)
             ->where('cp.usuario', $usuario)
             ->get()->first();
@@ -104,7 +104,6 @@ class ClienteRepoData implements AuthorizableContract, AuthenticatableContract
 
     /**
      * Metodo para validar cliente
-     * @param string $pin
      * @param string $email
      * @param string $password
      * @throws Exception
