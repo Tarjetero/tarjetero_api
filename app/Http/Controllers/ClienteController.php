@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use App\Helpers\Msg;
 use App\Helpers\ApiResponse;
-use App\Helpers\CodeResponse;
 use App\Utilerias\Utilerias;
 use Illuminate\Http\Request;
+use App\Helpers\CodeResponse;
 use App\Services\Data\ClienteServiceData;
 use Illuminate\Support\Facades\Validator;
 use App\Services\Actions\ClienteServiceAction;
@@ -14,18 +15,18 @@ use App\Services\Actions\ClienteServiceAction;
 class ClienteController
 {
     /**
-     * Obtiener listado de clientes
+     * Obtiener datos de cliente
      * @param Request $request
      * @return mixed
      */
-    public function listar(Request $request){
+    public function getCliente(Request $request){
         try{
 
             $filtros = $request->all();
 
-            $clientes = ClienteServiceData::listar($filtros);
+            $cliente = ClienteServiceData::getClienteInfo($filtros);
 
-            return response(ApiResponse::build(CodeResponse::EXITO,"Datos listados correctamente.",$clientes));
+            return response(ApiResponse::build(CodeResponse::EXITO,"Datos listados correctamente.", $cliente));
 
         }catch(Exception $e){
             return response(ApiResponse::build(CodeResponse::ERROR,$e->getMessage()));
@@ -37,20 +38,27 @@ class ClienteController
      * @param Request $request
      * @return mixed
      */
-    public function agregarCliente(Request $request){
+    public function registro(Request $request){
         try{
 
             $reglasValidacion = [
-                'nombreComercial'          => 'required',
+                'email'             => 'required',
+                'usuario'           => 'required',
+                'password'          => 'required',
+                'passwordConfirm'   => 'required',
+                'nombre'            => 'required',
+                'apellidos'         => 'required',
             ];
 
-            $validation = Validator::make($request->all(),$reglasValidacion,Msg::VALIDATIONS);
+            $validation = Validator::make($request->all(),$reglasValidacion, Msg::VALIDATIONS);
 
             if($validation->fails())
                 throw new Exception(Utilerias::obtenerMensajesValidator($validation->getMessageBag()));
 
             $datos = $request->all();
-            $result = ClienteServiceAction::agregarCliente($datos);
+            $datos['ip'] = $request->ip();
+            $datos['userAGent'] = $request->userAgent();
+            $result = ClienteServiceAction::registroCliente($datos);
 
             return response(ApiResponse::build(CodeResponse::EXITO,"Operación realizada correctamente.",$result));
 

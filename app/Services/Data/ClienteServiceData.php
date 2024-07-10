@@ -2,40 +2,29 @@
 
 namespace App\Services\Data;
 
-use App\Constantes\FiltroGlobal;
-use App\Constantes\Plataforma;
-use App\Constantes\StatusGlobal;
-use App\Repository\Data\CanalCaptacionRepoData;
-use App\Repository\Data\EmailRepoData;
-use App\Repository\Data\EtiquetaRepoData;
-use App\Repository\Data\LeadRepoData;
-use App\Repository\Data\OportunidadRepoData;
-use App\Repository\Data\PaisRepoData;
-use App\Repository\Data\PlataformaRepoData;
-use App\Repository\Data\SeguimientoRepoData;
-use App\Repository\Data\TelefonoRepoData;
-use App\Repository\Data\UsuarioRepoData;
-use App\Utilerias\TextoUtils;
-use Exception;
-use Illuminate\Support\Facades\Log;
 use stdClass;
+use Exception;
+use App\Utilerias\TextoUtils;
+use Illuminate\Support\Facades\Log;
+use App\Repository\Data\ClienteRepoData;
 
-class LeadServiceData
+class ClienteServiceData
 {
+
     /**
      * Metodo para listar clientes
      * @param $filtros
      * @return array $clientes
      * @throws Exception
      */
-    public static function listarGestor($filtros)
+    public static function getClienteInfo($filtros)
     {
         try {
-
-            return ClienteRepoData::listarGestor($filtros);
+            $cliente = ClienteRepoData::getClienteInfo($filtros);
+            return $cliente;
         } catch (Exception $e) {
-            TextoUtils::agregarLogError($e, "LeadServiceData::listar()");
-            throw new Exception("Problema en servicio listar leads. {$e->getMessage()} ", 300, $e);
+            TextoUtils::agregarLogError($e, "ClienteServiceData::listar()");
+            throw new Exception("Problema en servicio obtener cliente. {$e->getMessage()} ", 300, $e);
         }
     }
 }
