@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TarjetaController;
 
 /* "litipk/php-bignumbers": "^0.8.6",
 "simplesoftwareio/simple-qrcode": "^4.2.0",
@@ -24,10 +25,10 @@ $router->group(['middleware' => ['cors']], function () use ($router) {
         $router->get('/', ['uses' => 'ClienteController@getCliente']);
         $router->post('/agregar', ['uses' => 'ClienteController@agregar']);
     });
-    $router->group(['prefix' => 'tarjetas'], function () use ($router) {
-        $router->get('/', ['uses' => 'TarjetaController@getTarjeta']);
-        $router->get('/listar', ['uses' => 'TarjetaController@getTarjetas']);
-        $router->post('/agregar', ['uses' => 'TarjetaController@agregar']);
+    Route::controller(TarjetaController::class)->prefix('tarjetas')->group(function () {
+      Route::get('', 'getTarjeta');
+      Route::get('listar', 'getTarjetas');
+      Route::post('agregar', 'agregar');
     });
     $router->group(['prefix' => 'catalogos'], function () use ($router) {
         $router->get('/', ['uses' => 'ClienteController@getUsuarios']);
