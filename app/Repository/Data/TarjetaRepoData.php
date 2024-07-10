@@ -16,7 +16,12 @@ class TarjetaRepoData
   public static function listar(array $filtros): array
   {
     $query = DB::table('tarjetas AS t')
-      ->select('t.*');
+      ->select(
+        't.*',
+        'cmt.icono'
+      )
+      ->leftJoin('cat_marcas_tarjetas AS cmt', 'cmt.marca_tarjeta_id', 't.marca_tarjeta_id')
+      ;
 
     TarjetaRH::getListarFiltros($query, $filtros);
 
