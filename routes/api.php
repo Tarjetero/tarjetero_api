@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TarjetaController;
+use App\Http\Controllers\ClienteController;
 
 /* "litipk/php-bignumbers": "^0.8.6",
 "simplesoftwareio/simple-qrcode": "^4.2.0",
@@ -16,14 +17,14 @@ $router->get('/', function () use ($router) {
 $router->group(['middleware' => ['cors']], function () use ($router) {
     // AUTH
     Route::controller(AuthController::class)->prefix('auth')->group(function () {
-        Route::get('login', 'authenticate');
+        Route::post('login', 'authenticate');
         Route::post('logout', 'cerrarSesion');
-        Route::post('version', 'version');
-      });
+        Route::get('version', 'version');
+    });
     // TEST
-    $router->group(['prefix' => 'clientes'], function () use ($router) {
-        $router->get('/', ['uses' => 'ClienteController@getCliente']);
-        $router->post('/agregar', ['uses' => 'ClienteController@agregar']);
+    Route::controller(ClienteController::class)->prefix('clientes')->group(function () {
+        Route::get('/', 'getCliente');
+        Route::post('/registro', 'registro');
     });
     Route::controller(TarjetaController::class)->prefix('tarjetas')->group(function () {
       Route::get('', 'getTarjeta');
@@ -34,6 +35,4 @@ $router->group(['middleware' => ['cors']], function () use ($router) {
         $router->get('/', ['uses' => 'ClienteController@getUsuarios']);
         $router->post('/', ['uses' => 'ClienteController@getUsuarios']);
     });
-
-    //$router->get('clientes/getClientes', ['uses' => 'ClienteController@getUsuarios']);
 });
