@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
-use PDateTime;
 use DateTime;
 use stdClass;
 use Imagick;
@@ -61,7 +60,7 @@ class Utilerias
     public static function now()
     {
         $timeZone = env('APP_TIMEZONE');
-        return PDateTime::now(new \DateTimeZone($timeZone))->format('Y-m-d H:i:s');
+        return Carbon::now(new \DateTimeZone($timeZone))->format('Y-m-d H:i:s');
     }
 
     public static function obtenerMensajesValidator(MessageBag $excepciones): string
@@ -235,12 +234,12 @@ class Utilerias
      */
     public static function sumDiasAFechaSinTiempo($fecha, $numeroSuma)
     {
-        return PDateTime::create($fecha)->addDays($numeroSuma)->format('Y-m-d');
+        return Carbon::create($fecha)->addDays($numeroSuma)->format('Y-m-d');
     }
 
     public static function restDiasAFechaSinTiempo($fecha, $numeroSuma)
     {
-        return PDateTime::create($fecha)->subDays($numeroSuma)->format('Y-m-d');
+        return Carbon::create($fecha)->subDays($numeroSuma)->format('Y-m-d');
     }
 
     /**
@@ -251,7 +250,7 @@ class Utilerias
      */
     public static function restMesesAFechaSinTiempo($fecha, $numeroResta)
     {
-        return PDateTime::create($fecha)->subMonths($numeroResta)->format('Y-m-d');
+        return Carbon::create($fecha)->subMonths($numeroResta)->format('Y-m-d');
     }
 
     /**
@@ -262,7 +261,7 @@ class Utilerias
      */
     public static function sumMesesAFechaSinTiempo($fecha, $numeroSuma)
     {
-        return PDateTime::create($fecha)->addMonths($numeroSuma)->format('Y-m-d');
+        return Carbon::create($fecha)->addMonths($numeroSuma)->format('Y-m-d');
     }
 
     /**
@@ -327,31 +326,9 @@ class Utilerias
     public static function fechaActualMasMilisegundos()
     {
         $timeZone = env('APP_TIMEZONE');
-        return PDateTime::now(new \DateTimeZone($timeZone))->format('Y-m-d H:i:s.u');
+        return Carbon::now(new \DateTimeZone($timeZone))->format('Y-m-d H:i:s.u');
     }
 
-    /**
-     * Función que genera una condcion en el SQL para filtrar fechas
-     *
-     * @param Builder $query
-     * @param         $fechaInicio
-     * @param         $fechaFin
-     * @param string $campo
-     */
-    public static function buildNumerosQuery(&$query, $numeroInicio, $numeroFin, string $campo)
-    {
-        if (!empty($numeroInicio) && !empty($numeroFin) && $numeroInicio < $numeroFin) {
-            $query->whereBetween($campo, [$numeroInicio, $numeroFin]);
-        }
-
-        if (!empty($numeroInicio) && empty($numeroFin)) {
-            $query->where($campo, '>=', $numeroInicio);
-        }
-
-        if (empty($numeroInicio) && !empty($numeroFin)) {
-            $query->where($campo, '<=', $numeroFin);
-        }
-    }
 
     /**
      * Método el cual envías una string y regresa la string limpia de caracteres especiales
@@ -365,40 +342,6 @@ class Utilerias
         $cadena = utf8_decode($cadena);
         $cadena = strtr($cadena, utf8_decode($originales), $modificadas);
         return utf8_encode($cadena);
-    }
-
-    /**
-     * Método para procesar una imagen con imagick y retornarlo como archivo nuevo
-     * @param $archivo        [Archivo que llega del front]
-     * @param $nombreNuevo    [Nombre nuevo que le pondrás al archivo sin la extension]
-     * @param $width          [Ancho de la nueva imagen]
-     * @param $height         [Alto de la nueva imagen]
-     * @param $quality        [Numero del % de calidad del nuevo archivo]
-     * @param $nombreOriginal [Nombre original del archivo, es decir, el que llega del front]
-     * @return UploadedFile   [Archivo nuevo listo para utilizarlo]
-     */
-    public static function procesarImagenConImagickDeprecated($archivo, $nombreNuevo, $width, $height, $quality, $nombreOriginal)
-    {
-        try {
-            $handle = fopen($archivo, 'rb');
-            $imgResize = new Imagick();
-            $imgResize->readImageFile($handle);
-            $imgResize->resizeImage($width, $height, Imagick::FILTER_LANCZOS, 1,true);
-            $imgResize->setCompressionQuality($quality);
-            $imgResize->writeImageFile(fopen($nombreNuevo, "wb")); //also works
-            $imgResize->setFilename($nombreNuevo);
-
-            $mimeType = File::mimeType($imgResize->getFilename());
-            $size = File::size($imgResize->getFilename());
-            $archivoNuevo = new UploadedFile($imgResize->getFilename(), $nombreOriginal, $mimeType, $size, false, true);
-
-            $imgResize->clear();
-            $imgResize->destroy();
-
-            return $archivoNuevo;
-        } catch (Exception $e) {
-            throw new Exception("Problema en método procesarImagenConImagick: " . $e->getMessage());
-        }
     }
 
     public static function obtenerMensajeLogEndpoint($mensaje)
@@ -419,17 +362,6 @@ class Utilerias
             array_push($accumulator[$key], $item);
             return $accumulator;
         }, []);
-    }
-
-    public static function validarFechaMinio($fecha): bool
-    {
-        $tempDate = explode('/', $fecha);
-        if (count($tempDate) == 1) return false;
-        $validarFecha[] = $tempDate[1];
-        $validarFecha[] = $tempDate[0];
-        $validarFecha[] = $tempDate[2];
-
-        return (bool)strtotime(implode('/', $validarFecha));
     }
 
     public static function validarFecha($fecha): bool
@@ -505,125 +437,6 @@ class Utilerias
     }
 
     /**
-     * Método para procesar una imagen a tipo thumbnail y subirla a s3
-     * @param $nombreArchivoSistemaSinExtension - nombre del archivo sistema sin extension
-     * @param $archivoSubir - archivo a subir, procesar
-     * @param $fecha - fecha procesada por PDateTime::create
-     * @param $width - ancho
-     * @param $height - alto
-     * @param $quality - calidad
-     * @param $tipoArchivo - tipo de archivo donde se subira, estan definidos en TipoArchivo.php
-     * @param $ruta - es la ruta de la carpeta donde se va guardar sin / al final
-     * @param $fotoPerfil - define si el archivo es una foto de perfil
-     * @return string
-     * @throws Exception
-     */
-    public static function subirFotoThumbnail($nombreArchivoSistemaSinExtension, $archivoSubir, $fecha, $width, $height, $quality, $tipoArchivo, $ruta, $fotoPerfil = false, $extLowerCase = null): string
-    {
-        try {
-            $templateFilename = '';
-            $extension = is_null($extLowerCase) ? $archivoSubir->getClientOriginalExtension() : strtolower($extLowerCase);
-            //Se hacen armado nombre de archivo
-            $nombreArchivoThumb  = $nombreArchivoSistemaSinExtension . "-THUMBNAIL-" . $width . "X" . $height . "." . $extension;
-
-            // Procesamos la imagen con imagick y obtenemos un nuevo archivo
-            $archivoNuevo = Utilerias::procesarImagenAThumbnail(
-                $archivoSubir,
-                $nombreArchivoThumb,
-                $width,
-                $height,
-                $quality
-            );
-
-            // Se arma ruta con el archivo para thumbnail
-            $rutaGuardadoNombre  = $ruta . '/' . $nombreArchivoThumb;
-
-            // Se sube foto thumbnail 90 x 108
-            $archivo = new ArchivoSubirS3($archivoNuevo, $fecha, $tipoArchivo, $rutaGuardadoNombre);
-
-            if($fotoPerfil){
-                StorageService::subirFotoPerfil([$archivo]);
-            }
-            else{
-                StorageService::subir([$archivo]);
-            }
-
-            return $nombreArchivoThumb;
-        } catch (Exception $e) {
-            Log::error($e->getMessage());
-            throw new Exception("Problema en sevicio subir archivo tipo thumbnail: " . $e->getMessage());
-        } finally {
-            if (file_exists($nombreArchivoThumb)) unlink($nombreArchivoThumb);
-        }
-    }
-
-    /**
-     * Método para procesar una imagen a tipo thumbnail
-     * @param $archivo - archivo a procesar
-     * @param $nombre - nombre ya completo del archivo thumbnail
-     * @param $width  - ancho
-     * @param $height - alto
-     * @param $quality - int porcentaje de calidad
-     * @return UploadedFile
-     * @throws Exception
-     */
-    public static function procesarImagenAThumbnail($archivo, $nombre, $width, $height, $quality)
-    {
-        try {
-            $handle = fopen($archivo, 'rb');
-            $im = new Imagick();
-            $im->readImageFile($handle);
-            $im->cropThumbnailImage($width, $height);
-            $im->setCompressionQuality($quality);
-            $im->writeImageFile(fopen($nombre, "wb")); //also works
-            $im->setFilename($nombre);
-
-            $mimeType = File::mimeType($im->getFilename());
-            $size = File::size($im->getFilename());
-            $archivoNuevo = new UploadedFile($im->getFilename(), $nombre, $mimeType, $size, false, true);
-
-            $im->clear();
-            $im->destroy();
-
-            return $archivoNuevo;
-        } catch (Exception $e) {
-            throw new Exception("Problema en método procesarImagenConImagick: " . $e->getMessage());
-        }
-    }
-
-    /**
-     * Método para procesar calidad de una imagen
-     * @param $quality - int porcentaje de calidad
-     * @return UploadedFile
-     * @throws Exception
-     */
-    public static function procesarCalidadImagen($archivo, $nombre,$quality, &$sizeGuardar = 0)
-    {
-        try {
-            $handle = fopen($archivo, 'rb');
-            $imagick = new Imagick();
-
-            $imagick->readImageFile($handle);
-            $imagick->setImageCompression(Imagick::COMPRESSION_JPEG);
-            $imagick->setCompressionQuality($quality);
-            $imagick->writeImageFile(fopen($nombre, "wb"));
-            $imagick->setFilename($nombre);
-
-            $mimeType = File::mimeType($imagick->getFilename());
-            $size = File::size($imagick->getFilename());
-            $sizeGuardar = $size;
-            $archivoNuevo = new UploadedFile($imagick->getFilename(), $nombre, $mimeType, $size, false, true);
-
-            $imagick->clear();
-            $imagick->destroy();
-
-            return $archivoNuevo;
-        } catch (Exception $e) {
-            throw new Exception("Problema en método procesarCalidadImagen: " . $e->getMessage());
-        }
-    }
-
-    /**
      * Método para dar formato fecha
      * @param null $fecha ('2020-01-17 16:08:51') o si llega null, toma fecha actual
      * @param int $formato
@@ -634,7 +447,7 @@ class Utilerias
     public static function dateFormat($fecha = null, $formato = 1, $showHora = true)
     {
         $timeZone = env('APP_TIMEZONE');
-        $dateTime = new DateTime($fecha != null ? $fecha : PDateTime::now(new \DateTimeZone($timeZone)));
+        $dateTime = new Carbon($fecha != null ? $fecha : Carbon::now(new \DateTimeZone($timeZone)));
         $hora     = $dateTime->format('H:i:s');
         switch ($formato) {
             // yyyy-mm-dd
@@ -704,7 +517,7 @@ class Utilerias
     public static function calcularDiffFechas($fechaI, $fechaF = null, $tipoRespuesta = '')
     {
         $fechaI = new DateTime($fechaI);
-        $fechaF = new DateTime($fechaF != null ? $fechaF : PDateTime::now(new \DateTimeZone(env('APP_TIMEZONE'))));
+        $fechaF = new DateTime($fechaF != null ? $fechaF : Carbon::now(new \DateTimeZone(env('APP_TIMEZONE'))));
 
         $diff = $fechaI->diff($fechaF);
 
@@ -805,43 +618,6 @@ class Utilerias
         return $numero;
     }
 
-    public static function calculoMontoMovimiento($saldo, $index, $movimientos, $mesActual)
-    {
-        $acumulado = $saldo->monto_saldo_inicial;
-        $monto     = 0;
-
-        if ($mesActual == 'true') {
-            $size = $index++;
-            for ($i = 0; $i <= $size; $i++) {
-                $acumulado = $acumulado + $movimientos[$i]->monto_total_compra - $movimientos[$i]->monto_total_consumo;
-            }
-
-            $monto = $acumulado;
-        } else {
-            $monto = $movimientos[$index]->saldo_monto;
-        }
-
-        return $monto;
-    }
-
-    public static function calculoSaldoMovimiento($saldo, $index, $movimientos, $mesActual)
-    {
-        $acumulado  = $saldo->litros_saldo_inicial;
-        $monto      = 0;
-
-        if ($mesActual == 'true') {
-            $size = $index++;
-            for ($i = 0; $i <= $size; $i++) {
-                $acumulado = $acumulado + $movimientos[$i]->litros_total_compra - $movimientos[$i]->litros_total_consumo;
-            }
-
-            $monto = $acumulado;
-        } else {
-            $monto = $movimientos[$index]->saldo_litros;
-        }
-
-        return $monto;
-    }
 
     /**
      * Método para ordenar array de objetos respecto a un campo
@@ -860,29 +636,6 @@ class Utilerias
         array_multisort($arrAux, $order, $arrIni);
 
         return $arrIni;
-    }
-
-    /**
-     * Metodo que obtiene el total acumulado de un campo dado de un array
-     * El array puede ser de arrays u objetos
-     * @param array $datos
-     * @param $campo Nombre del campo del que se obtiene el acumulado
-     */
-    public static function obtenerTotalCampoArray(array $datos, $campo)
-    {
-        return empty($datos) ? 0.0 : array_reduce($datos, function ($acumulado, $item) use ($campo) {
-            $acumuladoDecimal = empty($acumulado) ? Decimal::create(0) : Decimal::create($acumulado);
-            $campoSumar = Decimal::create(0);
-
-            if (is_object($item))
-                $campoSumar = empty($item->$campo) ? Decimal::create(0) : Decimal::create($item->$campo);
-
-            if (is_array($item))
-                $campoSumar = empty($item[$campo]) ? Decimal::create(0) : Decimal::create($item[$campo]);
-
-            $acumuladoDecimal = $acumuladoDecimal->add($campoSumar);
-            return $acumuladoDecimal->__toString();
-        });
     }
 
     public static function eliminarEspaciosCaracter($cadena,$caracter){
@@ -996,10 +749,6 @@ class Utilerias
       return $comparar > $rangoInicial && $comparar <= $rangoFinal;
     }
 
-    private function getNombreCarpetaFolio($rangoInicial,$rangoFinal){
-      return "{$rangoInicial}-{$rangoFinal}";
-    }
-
 		/**
 	 * Método para obtener el folio por tipo y actualizar en su respectivo row
 	 * @param array $datos
@@ -1016,187 +765,6 @@ class Utilerias
 			throw new Exception("Problema en servicio get set categoria folio");
 		}
 	}
-    
-    /**
-     * Método para armar la ruta base de archivos relacionas a compras
-     * @param  mixed $modulo
-     * @param  mixed $fecha
-     * @return stdClass
-     */
-    public static function armarRutaArchivoRelComprasArticulos($modulo, $fecha): stdClass
-	{
-		try {
-            $res = new stdClass();
-            $res->ruta  = '';
-            $res->fecha = PDateTime::create($fecha);
-            $res->fechaFormat = PDateTime::create($fecha)->format('Y_m');
-
-			switch ($modulo) {
-                case Constantes::T_ARCHIVO_REL_COMPRAS_FACTURAS_PROVEEDORES:
-                    $res->ruta = StorageRutas::CARPETA_COMPRAS_ARTICULOS . "facturasProveedores/" . $res->fechaFormat . "/";
-                    break;
-
-                case Constantes::T_ARCHIVO_REL_COMPRAS_RECIBOS_PAGOS:
-                    $res->ruta = StorageRutas::CARPETA_COMPRAS_ARTICULOS . "facturasProveedores/" . $res->fechaFormat . "/";
-                    break;
-
-                case Constantes::T_ARCHIVO_REL_COMPRAS_REQUISICIONES:
-                    $res->ruta = StorageRutas::CARPETA_COMPRAS_ARTICULOS . "requisiciones/" . $res->fechaFormat . "/";
-                    break;
-
-                case Constantes::T_ARCHIVO_REL_COMPRAS_DESCUENTOS:
-                    $res->ruta = StorageRutas::CARPETA_COMPRAS_ARTICULOS . "descuentos/" . $res->fechaFormat . "/";
-                    break;
-
-                case Constantes::T_ARCHIVO_REL_COMPRAS_CONSOLIDACIONES_PAGOS:
-                    $res->ruta = StorageRutas::CARPETA_COMPRAS_ARTICULOS . "consolidacionesPagos/" . $res->fechaFormat . "/";
-                    break;
-                
-                case Constantes::T_ARCHIVO_REL_DEVOLUCIONES_GARANTIAS:
-                    $res->ruta = StorageRutas::CARPETA_COMPRAS_ARTICULOS . "devolucionesGarantias/" . $res->fechaFormat . "/";
-                    break;
-
-                case Constantes::T_ARCHIVO_REL_SOLICITUDES_REABASTECIMIENTOS:
-                    $res->ruta = StorageRutas::CARPETA_COMPRAS_ARTICULOS . "solicitudesReabastecimientos/" . $res->fechaFormat . "/";
-                    break;
-                    
-                case Constantes::T_ARCHIVO_REL_ORDENES_COMPRAS:
-                  	$res->ruta = StorageRutas::CARPETA_COMPRAS_ARTICULOS . "ordenesCompras/" . $res->fechaFormat . "/";
-                  	break;
-                
-                case Constantes::T_ARCHIVO_REL_ASIGNACION_ACTIVOS:
-                    $res->ruta = StorageRutas::CARPETA_COMPRAS_ARTICULOS . "asignaciones_activos/" . $res->fechaFormat . "/";
-                    break;
-
-                case Constantes::T_ARCHIVO_REL_DESECHO_INDUSTRIAL:
-                    $res->ruta = StorageRutas::CARPETA_COMPRAS_ARTICULOS . "desechos_industriales/" . $res->fechaFormat . "/";
-                    break;
-
-                case Constantes::T_ARCHIVO_REL_FORMATO_VACACIONES:
-                    $res->ruta = StorageRutas::CARPETA_COMPRAS_ARTICULOS . "formatos_vacaciones/" . $res->fechaFormat . "/";
-                    break;
-                
-                case Constantes::T_ARCHIVO_REL_JUSTIFICANTE_FALTAS:
-                    $res->ruta = StorageRutas::CARPETA_COMPRAS_ARTICULOS . "justificantes_faltas/" . $res->fechaFormat . "/";
-                    break;
-
-                case Constantes::T_ARCHIVO_REL_PERMISOS_ADMINISTRATIVOS:
-                    $res->ruta = StorageRutas::CARPETA_COMPRAS_ARTICULOS . "permisos_administrativos/" . $res->fechaFormat . "/";
-                    break;
-                case Constantes::T_ARCHIVO_REL_EVIDENCIAS_ACTIVOS:
-                    $res->ruta = StorageRutas::CARPETA_COMPRAS_ARTICULOS . "evidencias_activos" . $res->fechaFormat . "/";
-                    break;
-                default:
-                    # code...
-                    break;
-            }
-
-			return $res;
-		} catch (Exception $e) {
-			Log::error("Problema al armar ruta de archivo relacionado a compras articulos " . $e->getMessage());
-			throw new Exception("Problema al armar ruta de archivo relacionado a compras articulos");
-		}
-    }
-
-    /**
-     * Procesa imagen con resize y en caso requerido marca de agua
-     * @param $archivo        [Archivo que llega del front]
-     * @param $nombreNuevo    [Nombre nuevo que le pondrás al archivo sin la extension]
-     * @param $width          [Ancho de la nueva imagen]
-     * @param $height         [Alto de la nueva imagen]
-     * @param $quality        [Numero del % de calidad del nuevo archivo]
-     * @param $nombreOriginal [Nombre original del archivo, es decir, el que llega del front]
-     * @param $setWatermark default = false, aplica si requiere marca de agua
-     * @return UploadedFile   [Archivo nuevo listo para utilizarlo]
-     */
-    public static function procesarImagenConImagick($archivo, $nombreNuevo, $width, $height, $quality, $nombreOriginal, $setWatermark = false)
-    {
-        try {
-            // Lectura y creacion de imagenes de trabajo
-            //$pathWatermark = base_path() . '/public/assets/img/logo-marca-agua.png';
-            $pathWatermark = 'http://l0m4xp-apps-storage.s3.amazonaws.com/berhock/mglogistics/pro/private/assets/imagenes/logo-marca-agua.png';
-            $watermark     = new Imagick();
-            $watermark->readImage($pathWatermark);
-
-            $handle    = fopen($archivo, 'rb');
-            $imgResize = new Imagick();
-            $imgResize->readImageFile($handle);
-
-            $canvasImg = new Imagick();
-            $canvasImg->newImage($width, $height, new ImagickPixel('white'));
-            $canvasImg->setImageFormat('png');
-
-            // Aplica resize de marca de agua con las proporciones divididas entre 5
-            $watermark->resizeImage(220, 220, Imagick::FILTER_BOX, 1, true);
-            $paddingWatermark = 20;
-
-            // Calcula ejes para posicionar marca de agua dentro de canvas
-            $ejeXWatermark    = ($width - $watermark->getImageWidth()) - $paddingWatermark;
-            $ejeYWatermark    = ($height - $watermark->getImageHeight()) - $paddingWatermark;     
-            
-            // Calcula los ejes para centrar la imagen con resize en el canvas
-            $imgResize->resizeImage($width, $height, Imagick::FILTER_BOX, 1,true);
-            $ejeXCanvas = ($width - $imgResize->getImageWidth()) / 2;
-            $ejeYCanvas = ($height - $imgResize->getImageHeight()) / 2;
-            $canvasImg->compositeImage($imgResize, Imagick::COMPOSITE_OVER, $ejeXCanvas, $ejeYCanvas);
-
-            if($setWatermark)
-              $canvasImg->compositeImage($watermark, Imagick::COMPOSITE_OVER, $ejeXWatermark, $ejeYWatermark);
-
-            // Setea calidad y escribe la imagen completa con canvas, resize y marca de agua
-            $canvasImg->setCompressionQuality($quality);
-            $canvasImg->writeImageFile(fopen($nombreNuevo, "wb")); 
-            $canvasImg->setFilename($nombreNuevo);
-            $mimeType     = File::mimeType($canvasImg->getFilename());
-            $size         = File::size($canvasImg->getFilename());
-            $archivoNuevo = new UploadedFile($canvasImg->getFilename(), $nombreOriginal, $mimeType, $size, false, true);
-
-            $canvasImg->clear();
-            $canvasImg->destroy();
-            $imgResize->clear();
-            $imgResize->destroy();
-            $watermark->clear();
-            $watermark->destroy();
-
-            return $archivoNuevo;
-        } catch (Exception $e) {
-            throw new Exception("Problema en método procesarImagenCatalogo: " . $e->getMessage());
-        }
-    }
-
-    /**
-     * Crea thumbnail de una imagen con Imagick
-     * @param $archivo        [Archivo que llega del front]
-     * @param $nombreNuevo    [Nombre nuevo que le pondrás al archivo sin la extension]
-     * @param $width          [Ancho de la nueva imagen]
-     * @param $height         [Alto de la nueva imagen]
-     * @param $nombreOriginal [Nombre original del archivo, es decir, el que llega del front]
-     * @return UploadedFile   [Archivo nuevo listo para utilizarlo]
-     */
-    public static function crearThumbnailConImagick($archivo, $nombreNuevo, $width, $height, $nombreOriginal)
-    {
-        try {
-
-            $handle       = fopen($archivo, 'rb');
-            $imgThumbnail = new Imagick();
-            $imgThumbnail->readImageFile($handle);
-            $imgThumbnail->thumbnailImage($width, $height,true);
-
-            $imgThumbnail->writeImageFile(fopen($nombreNuevo, "wb")); 
-            $imgThumbnail->setFilename($nombreNuevo);
-            
-            $mimeType     = File::mimeType($imgThumbnail->getFilename());
-            $size         = File::size($imgThumbnail->getFilename());
-            $archivoNuevo = new UploadedFile($imgThumbnail->getFilename(), $nombreOriginal, $mimeType, $size, false, true);
-
-            $imgThumbnail->clear();
-            $imgThumbnail->destroy();
-
-            return $archivoNuevo;
-        } catch (Exception $e) {
-            throw new Exception("Problema en método procesarImagenCatalogo: " . $e->getMessage());
-        }
-    }
 
     
     /** Método para obtener cadena con cierta longitud de acuerdo a un grupo de caracteres permitidos
@@ -1331,59 +899,14 @@ class Utilerias
     }
     
     /**
-     * cortarCadenas
-     *
-     * @param  mixed $cadena
-     * @param  mixed $arrayPropiedades
-     * @return void
-     */
-    public static function cortarCadenas(string $cadena, array &$arrayPropiedades): void
-    {
-        $longitud = strlen($cadena);
-        $numeroCadenasCortar = count($arrayPropiedades);
-        echo "\n longitud cadena completa-> $longitud";
-        echo "\n cantidad de cadenas a cortar -> $numeroCadenasCortar";
-        $indexCadena = 0;
-        $indexPropiedades = 0;
-        for ($i=1; $i <= $numeroCadenasCortar; $i++) {
-            $posicionNumeroCaracteres = $arrayPropiedades[$indexPropiedades]->long;
-            echo "\n subcadena -> " . substr($cadena, $indexCadena, $posicionNumeroCaracteres);
-            $subCadena = substr($cadena, $indexCadena, $posicionNumeroCaracteres);
-            echo "\n subcadena longitud -> " . strlen($subCadena);
-            $arrayPropiedades[$indexPropiedades]->valor = $subCadena;
-            $indexCadena = $indexCadena + $arrayPropiedades[$indexPropiedades]->long;
-            $indexPropiedades++;
-        }
-    }
-
-    /**
-     * esMismaLongitudCadenaValoras
-     *
-     * @param  string $cadena
-     * @param  string $longitud
-     * @return bool
-     */
-    public static function esMismaLongitudCadenaValor(string $cadena, int $longitud): bool
-    {
-        echo "\n longitud cadena -> " . strlen($cadena);
-        echo "\n longitud dada a comparar -> $longitud";
-
-        $esMismaLongitud = strlen($cadena) == $longitud;
-        $mensaje  = $esMismaLongitud ? "si" : "no";
-        echo "\n misma longitud -> $mensaje";
-
-        return $esMismaLongitud;
-    }
-
-    /**
-     * Utileria que creaa objeto PDateTime para manejarlo en el service que lo consume
+     * Utileria que creaa objeto Carbon para manejarlo en el service que lo consume
      * @param  string $fecha
-     * @return PDateTime
+     * @return Carbon
      */
-    public static function obtenerObjetoPDateTime($fecha = null): PDateTime
+    public static function obtenerObjetoCarbon($fecha = null): Carbon
     {
         $timeZone = env('APP_TIMEZONE');
-        $dateTime = $fecha != null ? PDateTime::create($fecha) : PDateTime::now(new \DateTimeZone($timeZone));
+        $dateTime = $fecha != null ? Carbon::create($fecha) : Carbon::now(new \DateTimeZone($timeZone));
 
         return $dateTime;
     }
@@ -1402,76 +925,6 @@ class Utilerias
 
         return $hashCorto;
     }
-
-    /**
-     * Método para armar la ruta base de archivos relacionas a contratos
-     * @param  mixed $modulo
-     * @param  mixed $fecha
-     * @return stdClass
-     */
-    public static function armarRutaArchivoRelContratos($modulo, $fecha): stdClass
-	{
-		try {
-            $res = new stdClass();
-            $res->ruta  = '';
-            $res->fecha = PDateTime::create($fecha);
-            $res->fechaFormat = PDateTime::create($fecha)->format('Y_m');
-
-			switch ($modulo) {
-                case Constantes::T_ARCHIVO_REL_CONTRATOS:
-                    $res->ruta = StorageRutas::CARPETA_CONTRATOS . "contratos/" . $res->fechaFormat . "/";
-                    break;
-
-                case Constantes::T_ARCHIVO_REL_CONTRATOS_CONSOLIDACIONES:
-                    $res->ruta = StorageRutas::CARPETA_CONTRATOS . "contratosConsolidaciones/" . $res->fechaFormat . "/";
-                    break;
-
-                default:
-                    # code...
-                    break;
-            }
-
-			return $res;
-		} catch (Exception $e) {
-			Log::error("Problema al armar ruta de archivo relacionado a contratos " . $e->getMessage());
-			throw new Exception("Problema al armar ruta de archivo relacionado a contratos");
-		}
-    }
-
-  /**
-   * Método para armar la ruta base de archivos relacionas a auditorias
-   * @param  mixed $modulo
-   * @param  mixed $fecha
-   * @return stdClass
-   */
-  public static function armarRutaArchivoRelAuditorias($modulo, $fecha): stdClass
-	{
-		try {
-      $res = new stdClass();
-      $res->ruta  = '';
-      $res->fecha = PDateTime::create($fecha);
-      $res->fechaFormat = PDateTime::create($fecha)->format('Y_m');
-
-    switch ($modulo) {
-      case Constantes::T_ARCHIVO_REL_AUDITORIA_ARCHIVOS:
-        $res->ruta = StorageRutas::CARPETA_AUDITORIAS . "auditorias/" . $res->fechaFormat . "/";
-        break;
-
-      case Constantes::T_ARCHIVO_REL_AUDITORIA_INCIDENCIA_ARCHIVOS:
-        $res->ruta = StorageRutas::CARPETA_AUDITORIAS . "incidencias/" . $res->fechaFormat . "/";
-        break;
-
-      default:
-        # code...
-        break;
-    }
-
-			return $res;
-		} catch (Exception $e) {
-			Log::error("Problema al armar ruta de archivo relacionado a auditorias " . $e->getMessage());
-			throw new Exception("Problema al armar ruta de archivo relacionado a auditorias");
-		}
-  }
 
   /**
    * Método para encriptar o desencriptar un password
@@ -1498,7 +951,7 @@ class Utilerias
    */
   public static function sumDiasAFechaConTiempo($fecha, $numeroSuma)
   {
-    return PDateTime::create($fecha)->addDays($numeroSuma)->format('Y-m-d H:i:s');
+    return Carbon::create($fecha)->addDays($numeroSuma)->format('Y-m-d H:i:s');
   }
 
     /**
@@ -1509,39 +962,21 @@ class Utilerias
      */
     public static function sumSegundosAFechaConTiempo($fecha, $numeroSuma)
     {
-        return PDateTime::create($fecha)->addSeconds($numeroSuma)->format('Y-m-d H:i:s');
+        return Carbon::create($fecha)->addSeconds($numeroSuma)->format('Y-m-d H:i:s');
         //$NuevaFecha = strtotime ( '+30 second' , $NuevaFecha ) ; 
     }
 
-  /**
-   * Método para convertir en negritas un texto de una tabla de actividades con estilos de mantenimientos
-   * @param  string $textoConvertir
-   * @return string  @textoConvertido
-   */
-  public static function convertirNegritasMantenimientos($textoConvertir){
-      return "<span class='label-info-bold'>".$textoConvertir."</span>";
-  }
+    /**l
+     * Utileria para manejar fechas
+     * @param string $zonaHoraria Zona horaria del cliente
+     * @return string $fechaActual
+     */
+    public static function fechaActual(string $zonaHoraria)
+    {
 
-  /**
-   * Método para armar la ruta base de archivos relacionas a visitas
-   * @param  mixed $fecha
-   * @param  mixed $visitaPersonaId
-   * @return stdClass
-   */
-  public static function armarRutaArchivoRelVisitas($fecha, $visitaId): stdClass
-	{
-		try {
-      $res = new stdClass();
-      $res->ruta  = '';
-      $res->fecha = PDateTime::create($fecha);
-      $res->fechaFormat = PDateTime::create($fecha)->format('Y');
+        $fechaActual = Carbon::now($zonaHoraria)->toDateTimeString();
 
-      $res->ruta = StorageRutas::CARPETA_VISITAS . $res->fechaFormat . "/" . $visitaId . "/";
+        return $fechaActual;
+    }
 
-			return $res;
-		} catch (Exception $e) {
-			Log::error("Problema al armar ruta de archivo relacionado a visitas " . $e->getMessage());
-			throw new Exception("Problema al armar ruta de archivo relacionado a visitas");
-		}
-  }
 }

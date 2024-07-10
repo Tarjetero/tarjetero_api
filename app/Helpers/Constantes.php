@@ -19,6 +19,13 @@ class Constantes
     const ES_GET  = 'GET';
     const ES_PUT  = 'PUT';
 
+    const USUARIO_TTL = 57600;
+
+    const SUSCRIPCION_PAGADA = 2;
+    const SUSCRIPCION_NO_PAGADA = 1;
+
+    const DIAS_SUSCRIPCION = 30;
+
     //Constantes para filtros de orden
     const REGISTRO_FECHA_ASC       = 'registro_fecha_asc';
     const REGISTRO_FECHA_DESC      = 'registro_fecha_desc';
