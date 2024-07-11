@@ -8,6 +8,7 @@ use App\Helpers\Constantes;
 use App\Repository\RH\UsuarioRH;
 use App\Utilerias\TelefonoUtils;
 use App\Utilerias\TextoUtils;
+use App\Utilerias\Utilerias;
 use Exception;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Foundation\Auth\Access\Authorizable;
@@ -110,7 +111,7 @@ class ClienteRepoData implements AuthorizableContract, AuthenticatableContract
      */
     public static function validarSesionCliente(string $email, string $password)
     {
-        $passwordSalt = TextoUtils::generarContrasenia($password);
+        $passwordSalt = Utilerias::generarPassword($password);
 
         $cliente = DB::table('clientes AS c')
             ->select(

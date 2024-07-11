@@ -24,7 +24,7 @@ class ClienteServiceAction
      */
     public static function registroCliente($datos)
     {
-        return DB::transaction(function() use($datos){
+        DB::transaction(function() use($datos){
             // Se valida email
             $email = ClienteRepoData::validarEmail($datos['email']);
             if(!empty($email))
@@ -36,21 +36,24 @@ class ClienteServiceAction
 
             // Se arma insert de nuevo cliente
             $insert = ClienteBO::armarInsert($datos);
-            $datos['clienteId'] = ClienteRepoAction::agregarCliente($insert);
-
+            ClienteRepoAction::agregarCliente($insert);
+            $datos['clienteId'] = $insert['cliente_id'];
+            
             // Se arma insert de perfil de cliente
             $insertPerfil = ClienteBO::armarInsertPerfil($datos);
             ClienteRepoAction::agregarClientePerfil($insertPerfil);
-
+            
             // Se arma insert de 1er suscripcion de cliente
             $insertSuscripcion = SuscripcionBO::armarInsert($datos);
             SuscripcionRepoAction::agregarSuscripcion($insertSuscripcion);
 
-            //Se realiza inicio de sesión despues de registrarse
-            $authData = AuthServiceData::autenticar($datos['email'], $datos['password'], $datos['ip'], $datos['userAgent']);
-
-            return $authData;
+            return;
         });
+
+        //Se realiza inicio de sesión despues de registrarse
+        $authData = AuthServiceData::autenticar($datos['email'], $datos['password'], $datos['ip'], $datos['userAgent']);
+
+        return $authData;
     }
 
     /**
