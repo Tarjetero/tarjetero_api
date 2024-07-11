@@ -2,10 +2,13 @@
 
 namespace App\Exceptions;
 
+use App\Helpers\ApiResponse;
+use App\Helpers\CodeResponse;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Database\QueryException;
 use Illuminate\Validation\ValidationException;
 use Throwable;
+use Exception;
 use Psr\Log\LogLevel;
 use Illuminate\Support\Facades\Log;
 
@@ -58,6 +61,11 @@ class Handler extends ExceptionHandler
       Log::warning('Validation Error: ' . $e->getMessage());
     });
 
+    $this->reportable(function (BusinessException $e) {
+      // Puedes personalizar cómo registrar las excepciones de validación aquí
+      Log::warning('Business Error: ' . $e->getMessage());
+    });
+
     // Manejo general de excepciones
     $this->reportable(function (Throwable $e) {
       Log::error('General Error: ' . $e->getMessage());
@@ -73,12 +81,20 @@ class Handler extends ExceptionHandler
    */
   public function render($request, Throwable $e)
   {
-    $response['status'] = 300;
     if ($e instanceof QueryException) {
-      return response()->json(array_merge($response, ['mensaje' => 'Ocurrió un error en DB!']), 500);
+      return response(ApiResponse::build(CodeResponse::ERROR, "Ocurrió un error en DB!."));
     }
     if ($e instanceof ValidationException) {
-      return response()->json(array_merge($response, ['mensaje' => 'Validación fallo!']), 422);
+      return response(ApiResponse::build(CodeResponse::ERROR, "Validación fallo!"));
+    }
+    if ($e instanceof ValidateRequestException) {
+      return response(ApiResponse::build(CodeResponse::ERROR, $e->getMessage()));
+    }
+    if ($e instanceof BusinessException) {
+      return response(ApiResponse::build(CodeResponse::ERROR, $e->getMessage()));
+    }
+    if ($e instanceof Exception) {
+      return response(ApiResponse::build(CodeResponse::ERROR, $e->getMessage()));
     }
     // Manejo de otras excepciones
     return parent::render($request, $e);
