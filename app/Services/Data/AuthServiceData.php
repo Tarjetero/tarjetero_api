@@ -7,10 +7,7 @@ use Exception;
 use Firebase\JWT\JWT;
 use App\Helpers\Constantes;
 use App\Utilerias\Utilerias;
-use App\Utilerias\TextoUtils;
-use App\Utilerias\SesionUtils;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;
 use App\Repository\Data\ClienteRepoData;
 use App\Repository\Actions\AuthRepoAction;
 
