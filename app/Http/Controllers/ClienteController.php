@@ -12,6 +12,7 @@ use App\Services\Data\ClienteServiceData;
 use Illuminate\Support\Facades\Validator;
 use App\Services\Actions\ClienteServiceAction;
 use Throwable;
+use App\Exceptions\ValidateRequestException;
 
 class ClienteController
 {
@@ -54,7 +55,7 @@ class ClienteController
             $validation = Validator::make($request->all(),$reglasValidacion, Msg::VALIDATIONS);
 
             if($validation->fails())
-                throw new Exception(Utilerias::obtenerMensajesValidator($validation->getMessageBag()));
+                throw new ValidateRequestException(Utilerias::obtenerMensajesValidator($validation->getMessageBag()));
 
             $datos = $request->all();
             $datos['ip'] = $request->ip();
