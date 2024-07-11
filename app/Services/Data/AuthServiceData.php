@@ -42,7 +42,7 @@ class AuthServiceData
     /**
      * Metodo para autenticar clientes
      * @param $filtros
-     * @return array $clientes
+     * @return object $authData
      * @throws Exception
      */
     public static function autenticar($email, $password, $ip, $userAgent)
@@ -87,6 +87,7 @@ class AuthServiceData
         $respuesta->apellidos       = $cliente->apellidos;
         $respuesta->sexo            = $cliente->sexo;
         $respuesta->fechaNacimiento = $cliente->fecha_nacimiento;
+        $respuesta->email           = $cliente->email;
         //$respuesta->zonaHoraria = $cliente->zona_horaria;
 
         return $respuesta;

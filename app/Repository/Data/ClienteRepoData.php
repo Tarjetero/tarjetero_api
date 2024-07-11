@@ -124,6 +124,7 @@ class ClienteRepoData implements AuthorizableContract, AuthenticatableContract
                 'c.apellidos',
                 'c.fecha_nacimiento',
                 'c.sexo',
+                'c.email'
             )
             ->join('clientes_perfil AS cp', 'cp.cliente_id', '=', 'c.cliente_id')
             ->where('c.email', $email)
