@@ -18,5 +18,9 @@ class TarjetaRH
     if (!empty($filtros['clienteId'])) {
       $query->where('t.cliente_id', $filtros['clienteId']);
     }
+
+    if (!empty($filtros['status'])) {
+      $query->whereIn('t.status', $filtros['status']);
+    }
   }
 }

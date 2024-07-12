@@ -16,4 +16,16 @@ class TarjetaServiceData
   {
     return TarjetaRepoData::listar($filtros);
   }
+
+  /**
+   * obtener objeto de registro de tarjeta
+   *
+   * @param  mixed $filtros
+   * @return object
+   */
+  public static function obtenerInfo(array $filtros): object
+  {
+    $tarjeta = TarjetaRepoData::obtenerTarjeta($filtros);
+    return  $tarjeta;
+  }
 }

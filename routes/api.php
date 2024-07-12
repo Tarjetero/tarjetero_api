@@ -22,20 +22,19 @@ $router->group(['middleware' => ['cors']], function () use ($router) {
         Route::post('logout', 'cerrarSesion');
         Route::get('version', 'version');
     });
-    // TEST
+    // CLIENTES
     Route::controller(ClienteController::class)->prefix('clientes')->group(function () {
-        Route::get('/', 'getCliente');
-        Route::post('/registro', 'registro');
+        Route::get('', 'getCliente');
+        Route::post('registro', 'registro');
     });
+    // TARJETAS
     Route::controller(TarjetaController::class)->prefix('tarjetas')->group(function () {
-      Route::get('', 'getTarjeta');
+      Route::get('', 'getTarjetaInfo');
       Route::get('listar', 'getTarjetas');
       Route::post('agregar', 'agregar');
+      Route::post('editar', 'editar');
     });
-    $router->group(['prefix' => 'catalogos'], function () use ($router) {
-        $router->get('/', ['uses' => 'ClienteController@getUsuarios']);
-        $router->post('/', ['uses' => 'ClienteController@getUsuarios']);
-    });
+    // CATALOGOS
     Route::controller(CatalogoController::class)->prefix('catalogos')->group(function () {
       Route::get('marcasTarjetas', 'getMarcasTarjetas');
     });
