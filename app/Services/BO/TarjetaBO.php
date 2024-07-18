@@ -30,6 +30,8 @@ class TarjetaBO
       $insert['mes_expiracion']       = !empty($datos['mesExpiracion']) ? $datos['mesExpiracion'] : null;
       $insert['codigo_cvv']           = !empty($datos['codigoCvv']) ? $datos['codigoCvv'] : null;
       $insert['comentario']           = !empty($datos['comentario']) ? $datos['comentario'] : null;
+      $insert['dia_corte']            = !empty($datos['diaCorte']) ? $datos['diaCorte'] : null;
+      $insert['dia_pago']             = !empty($datos['diaPago']) ? $datos['diaPago'] : null;
       $insert['status']               = Constantes::STATUS_ACTIVO;
       $insert['registro_fecha']       = Utilerias::now();
 
@@ -46,15 +48,19 @@ class TarjetaBO
       $update = [];
 
       $update['numero']               = $datos['numero'];
-      $update['ultimos_digitos']      = substr($datos['numero'], -4);
       $update['titular']              = $datos['titular'];
       $update['titulo']               = $datos['titulo'];
       $update['color']                = $datos['color'];
       $update['codigo_cvv']           = $datos['codigoCvv'];
-      $update['comentario']           = $datos['comentario'];
       $update['marca_tarjeta_id']     = $datos['marcaTarjetaId'];
-      $update['mes_expiracion']       = $datos['mesExpiracion'];
-      $update['anio_expiracion']      = $datos['anioExpiracion'];
+      $update['tipo']                 = $datos['tipo'] ?? Constantes::TARJETA_TIPO_TARJETERO;
+      $update['ultimos_digitos']      = substr($datos['numero'], -4);
+      $update['anio_expiracion']      = !empty($datos['anioExpiracion']) ? $datos['anioExpiracion'] : null;
+      $update['mes_expiracion']       = !empty($datos['mesExpiracion']) ? $datos['mesExpiracion'] : null;
+      $update['codigo_cvv']           = !empty($datos['codigoCvv']) ? $datos['codigoCvv'] : null;
+      $update['comentario']           = !empty($datos['comentario']) ? $datos['comentario'] : null;
+      $update['dia_corte']            = !empty($datos['diaCorte']) ? $datos['diaCorte'] : null;
+      $update['dia_pago']             = !empty($datos['diaPago']) ? $datos['diaPago'] : null;
       $update['actualizacion_fecha']  = Utilerias::now();
 
       return $update;
