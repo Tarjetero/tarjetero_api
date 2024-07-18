@@ -1,0 +1,1 @@
+ALTER TABLE tarjetas ADD COLUMN tipo INT DEFAULT 1;
