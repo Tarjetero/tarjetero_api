@@ -24,6 +24,7 @@ class TarjetaBO
       $insert['color']                = $datos['color'];
       $insert['numero']               = $datos['numero'];
       $insert['marca_tarjeta_id']     = $datos['marcaTarjetaId'];
+      $insert['tipo']                 = $datos['tipo'] ?? Constantes::TARJETA_TIPO_TARJETERO;
       $insert['ultimos_digitos']      = substr($datos['numero'], -4);;
       $insert['anio_expiracion']      = !empty($datos['anioExpiracion']) ? $datos['anioExpiracion'] : null;
       $insert['mes_expiracion']       = !empty($datos['mesExpiracion']) ? $datos['mesExpiracion'] : null;

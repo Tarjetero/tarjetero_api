@@ -26,6 +26,9 @@ class Constantes
 
     const DIAS_SUSCRIPCION = 30;
 
+    const TARJETA_TIPO_TARJETERO = 1;
+    const TARJETA_TIPO_GASTOS = 2;
+
     //Constantes para filtros de orden
     const REGISTRO_FECHA_ASC       = 'registro_fecha_asc';
     const REGISTRO_FECHA_DESC      = 'registro_fecha_desc';
