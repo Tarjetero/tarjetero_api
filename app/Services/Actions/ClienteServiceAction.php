@@ -92,7 +92,7 @@ class ClienteServiceAction
         // Se arma update del password cliente
         $datos['tipo'] = Constantes::EDITAR_PASSWORD;
         $update = ClienteBO::editarPerfil($datos);
-        ClienteRepoAction::actualizar($update, $datos['clienteId']);
+        ClienteRepoAction::actualizarPerfil($update, $datos['clienteId']);
 
       DB::commit();
 
