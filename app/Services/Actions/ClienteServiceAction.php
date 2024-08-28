@@ -4,16 +4,16 @@ namespace App\Services\Actions;
 
 use stdClass;
 use Exception;
-use App\Utilerias\TextoUtils;
+use Throwable;
+use App\Helpers\Constantes;
+use App\Utilerias\Utilerias;
 use App\Services\BO\ClienteBO;
+use App\Services\BO\SuscripcionBO;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use App\Services\Data\AuthServiceData;
 use App\Repository\Data\ClienteRepoData;
 use App\Repository\Actions\ClienteRepoAction;
 use App\Repository\Actions\SuscripcionRepoAction;
-use App\Services\BO\SuscripcionBO;
-use App\Services\Data\AuthServiceData;
-use Throwable;
 
 class ClienteServiceAction
 {
@@ -62,24 +62,41 @@ class ClienteServiceAction
     }
 
     /**
-     * Metodo para editar datos de cliente
+     * Metodo para editar foto de cliente
      * @param array $datos
      * @throws Exception
      */
-    public static function editarClienteInfo($datos)
+    public static function editarFoto($datos)
     {
-        try {
-            DB::beginTransaction();
+      DB::beginTransaction();
 
-            // Se arma update de cliente
-            $update = ClienteBO::armarUpdate($datos);
-            ClienteRepoAction::actualizar($update, $datos['clienteId']);
+        // Se arma update de foto de cliente
+        $datos['tipo'] = Constantes::EDITAR_FOTO;
+        $update = ClienteBO::editarPerfil($datos);
+        ClienteRepoAction::actualizar($update, $datos['clienteId']);
 
-            DB::commit();
-        } catch (Exception $e) {
-            DB::rollBack();
-            TextoUtils::agregarLogError($e, "ClienteServiceAction::editar()");
-            throw new Exception("Problema en servicio editar cliente. {$e->getMessage()}", 300, $e);
-        }
+      DB::commit();
+
+      return;
+    }
+
+    /**
+     * Metodo para editar password de cliente
+     * @param array $datos
+     * @throws Exception
+     */
+    public static function editarPassword($datos)
+    {
+      DB::beginTransaction();
+
+        // Se arma update del password cliente
+        $datos['tipo'] = Constantes::EDITAR_PASSWORD;
+        $update = ClienteBO::editarPerfil($datos);
+        dd($update);
+        ClienteRepoAction::actualizar($update, $datos['clienteId']);
+
+      DB::commit();
+
+      return;
     }
 }

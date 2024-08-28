@@ -29,6 +29,9 @@ class Constantes
     const TARJETA_TIPO_TARJETERO = 1;
     const TARJETA_TIPO_GASTOS = 2;
 
+    const EDITAR_FOTO = 'foto';
+    const EDITAR_PASSWORD = 'password';
+
     //Constantes para filtros de orden
     const REGISTRO_FECHA_ASC       = 'registro_fecha_asc';
     const REGISTRO_FECHA_DESC      = 'registro_fecha_desc';

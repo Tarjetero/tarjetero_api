@@ -39,4 +39,19 @@ class ClienteRepoAction
 
     return $id;
   }
+
+  /**
+   * Método que ejecuta un update en clientes
+   * @param  mixed $update
+   * @param  mixed $clienteId
+   * @return void
+   */
+	public static function actualizar(array $update, $clienteId)
+  {
+      DB::table('clientes')
+      ->where('cliente_id', $clienteId)
+      ->update($update);
+
+      return;
+  }
 }
