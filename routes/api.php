@@ -14,6 +14,14 @@ $router->get('/', function () use ($router) {
     return view("test");
 });
 
+/* Route::get('/enviar-correo', function () {
+  $correo = new DemoEmail(); // Reemplaza con tu clase de correo
+
+  Mail::to('destinatario@example.com')->send($correo);
+
+  return "Correo enviado";
+}); */
+
 
 $router->group(['middleware' => ['cors']], function () use ($router) {
     // AUTH
@@ -26,6 +34,8 @@ $router->group(['middleware' => ['cors']], function () use ($router) {
     Route::controller(ClienteController::class)->prefix('clientes')->group(function () {
         Route::get('', 'getCliente');
         Route::post('registro', 'registro');
+        Route::post('editarFoto', 'editarFoto');
+        Route::post('editarPassword', 'editarPassword');
     });
     // TARJETAS
     Route::controller(TarjetaController::class)->prefix('tarjetas')->group(function () {
@@ -33,6 +43,7 @@ $router->group(['middleware' => ['cors']], function () use ($router) {
       Route::get('listar', 'getTarjetas');
       Route::post('agregar', 'agregar');
       Route::post('editar', 'editar');
+      Route::post('eliminar', 'eliminar');
     });
     // CATALOGOS
     Route::controller(CatalogoController::class)->prefix('catalogos')->group(function () {
