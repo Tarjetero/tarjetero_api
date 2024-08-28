@@ -81,7 +81,7 @@ class TarjetaController extends Controller
   }
 
   /**
-   * Agrega un nuevo cliente
+   * Editar una tarjeta
    * @param Request $request
    * @return mixed
    */
@@ -105,6 +105,34 @@ class TarjetaController extends Controller
 
         $datos = $request->all();
         $result = TarjetaServiceAction::editarTarjeta($datos);
+
+        return response(ApiResponse::build(CodeResponse::EXITO,"Operación realizada correctamente.", $result));
+
+    } catch (Throwable $e) {
+        throw $e;
+    }
+  }
+
+  /**
+   * ELiminar una tarjeta
+   * @param Request $request
+   * @return mixed
+   */
+  public function eliminar(Request $request){
+    try{
+
+        $reglasValidacion = [
+          'clienteId'       => 'required',
+          'tarjetaId'       => 'required',
+        ];
+
+        $validation = Validator::make($request->all(),$reglasValidacion, Msg::VALIDATIONS);
+
+        if($validation->fails())
+            throw new Exception(Utilerias::obtenerMensajesValidator($validation->getMessageBag()));
+
+        $datos = $request->all();
+        $result = TarjetaServiceAction::eliminarTarjeta($datos);
 
         return response(ApiResponse::build(CodeResponse::EXITO,"Operación realizada correctamente.", $result));
 

@@ -47,15 +47,13 @@ class TarjetaRepoAction
    * @param  mixed $clienteId
    * @return void
    */
-	public static function actualizarTarjeta(array $update, $tarjetaId, $clienteId){
-        try{
-            DB::table('tarjetas')
-            ->where('tarjeta_id', $tarjetaId)
-            ->where('cliente_id', $clienteId)
-            ->update($update);
-    
-        }catch(QueryException $e){
-            throw $e;
-        }
-      }
+	public static function actualizarTarjeta(array $update, $tarjetaId, $clienteId)
+  {
+      DB::table('tarjetas')
+      ->where('tarjeta_id', $tarjetaId)
+      ->where('cliente_id', $clienteId)
+      ->update($update);
+
+      return;
+  }
 }

@@ -63,4 +63,22 @@ class TarjetaServiceAction
 
       return $tarjeta;
     }
+
+    /**
+     * Metodo para eliminar tarjeta de cliente
+     * @param array $datos
+     * @throws Exception
+     */
+    public static function eliminarTarjeta($datos)
+    {
+      DB::beginTransaction();
+
+        // Se arma update de cliente
+        $update = TarjetaBO::armarEliminar($datos);
+        TarjetaRepoAction::actualizarTarjeta($update, $datos['tarjetaId'], $datos['clienteId']);
+
+      DB::commit();
+
+      return;
+    }
 }

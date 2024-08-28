@@ -93,4 +93,19 @@ class TarjetaBO
 
       return $insert;
   }
+
+  /**
+   * Metodo para eliminar tarjeta de cliente
+   * @param array $datos
+   * @param $status
+   * @return array $update
+   */
+  public static function armarEliminar($datos){
+    $update = [];
+
+    $update['status'] = Constantes::STATUS_ELIMINADO;
+    $update['actualizacion_fecha']  = Utilerias::now();
+
+    return $update;
+  }
 }
